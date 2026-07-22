@@ -1,0 +1,959 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hallmark Designs | Architectural &amp; Interior Design Studio</title>
+    <!-- Google Fonts: Elegant & Clean Afacad Flux -->
+    <link href="https://fonts.googleapis.com/css2?family=Afacad+Flux:wght@100..1000&display=swap" rel="stylesheet">
+    <style>
+        /* Base Reset & Custom Warm Architectural Colors */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        html {
+            scroll-behavior: smooth;
+        }
+        body {
+            font-family: 'Afacad Flux', sans-serif;
+            background-color: #fcfbfa; /* Warm Off-white / Limestone background */
+            color: #2b2b2a; /* Soft Charcoal Text */
+            line-height: 1.6;
+            letter-spacing: 0.3px;
+        }
+
+        /* Navigation */
+        nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 10%;
+            background: rgba(252, 251, 250, 0.95);
+            backdrop-filter: blur(8px);
+            z-index: 1000;
+            border-bottom: 1px solid #edebe7;
+            transition: padding 0.35s ease, box-shadow 0.35s ease;
+        }
+        nav.scrolled {
+            padding: 12px 10%;
+            box-shadow: 0 8px 24px rgba(26, 26, 25, 0.06);
+        }
+
+        /* Scroll progress bar */
+        .scroll-progress {
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 3px;
+            width: 0%;
+            background-color: #1a1a19;
+            z-index: 1100;
+            transition: width 0.1s linear;
+        }
+
+        /* Back to top button */
+        .back-to-top {
+            position: fixed;
+            right: 30px;
+            bottom: 30px;
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background-color: #1a1a19;
+            color: #fcfbfa;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            cursor: pointer;
+            opacity: 0;
+            transform: translateY(12px);
+            pointer-events: none;
+            transition: opacity 0.3s ease, transform 0.3s ease, background 0.3s ease;
+            z-index: 900;
+        }
+        .back-to-top.show {
+            opacity: 1;
+            transform: translateY(0);
+            pointer-events: auto;
+        }
+        .back-to-top:hover {
+            background-color: #403f3c;
+        }
+
+        /* Generic scroll-reveal utility */
+        .reveal {
+            opacity: 0;
+            transform: translateY(32px);
+            transition: opacity 0.8s cubic-bezier(.16,.8,.3,1), transform 0.8s cubic-bezier(.16,.8,.3,1);
+        }
+        .reveal.in-view {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        .reveal-1 { transition-delay: 0.08s; }
+        .reveal-2 { transition-delay: 0.16s; }
+        .reveal-3 { transition-delay: 0.24s; }
+        .reveal-4 { transition-delay: 0.32s; }
+
+        @media (prefers-reduced-motion: reduce) {
+            .reveal, nav, .back-to-top { transition: none !important; }
+            html { scroll-behavior: auto; }
+        }
+        .brand-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            text-decoration: none;
+        }
+        .logo-img {
+            width: 35px;
+            height: 35px;
+            object-fit: contain;
+            display: block;
+        }
+        .logo-text {
+            font-size: 1.6rem;
+            font-weight: 700;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            color: #1a1a19;
+        }
+        .nav-links {
+            display: flex;
+            list-style: none;
+            gap: 35px;
+        }
+        .nav-links a {
+            text-decoration: none;
+            color: #575551;
+            font-size: 0.95rem;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            transition: color 0.3s;
+        }
+        .nav-links a:hover {
+            color: #1a1a19;
+        }
+
+        /* Hero Area with Dynamic Text and Background Slideshow */
+        .hero {
+            height: 100vh;
+            width: 100%;
+            display: flex;
+            align-items: center;
+            padding: 0 10%;
+            position: relative;
+            color: #fff;
+            overflow: hidden;
+            background-color: #1a1a19; 
+        }
+        .hero-slide {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            opacity: 0;
+            transition: opacity 1.2s ease-in-out, transform 0.1s linear;
+            will-change: transform;
+            z-index: 1;
+        }
+        .hero-slide.active {
+            opacity: 1;
+        }
+        .hero-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(rgba(26, 26, 25, 0.6), rgba(26, 26, 25, 0.6));
+            z-index: 2;
+        }
+        .hero-content {
+            max-width: 780px;
+            z-index: 3; 
+            position: relative;
+        }
+        .hero h1 {
+            font-size: 3.8rem;
+            line-height: 1.15;
+            margin-bottom: 20px;
+            font-weight: 700;
+            letter-spacing: 1px;
+            transition: opacity 0.4s ease-in-out, transform 0.4s ease-in-out;
+        }
+        .hero p {
+            font-size: 1.15rem;
+            font-weight: 300;
+            color: #e3dfda;
+            margin-bottom: 35px;
+            letter-spacing: 0.5px;
+            line-height: 1.7;
+            transition: opacity 0.4s ease-in-out, transform 0.4s ease-in-out;
+        }
+        .text-fade-out {
+            opacity: 0;
+            transform: translateY(-10px);
+        }
+        .btn-cta {
+            display: inline-block;
+            padding: 14px 35px;
+            background-color: #1a1a19;
+            color: #fcfbfa;
+            text-decoration: none;
+            text-transform: uppercase;
+            font-size: 0.9rem;
+            letter-spacing: 2px;
+            font-weight: 600;
+            transition: background 0.3s, transform 0.2s;
+        }
+        .btn-cta:hover {
+            background-color: #403f3c;
+            transform: translateY(-2px);
+        }
+
+        /* Services Section */
+        .services-section {
+            padding: 120px 10%;
+            background-color: #f4f1eb;
+            border-bottom: 1px solid #edebe7;
+        }
+        .section-header {
+            text-align: center;
+            max-width: 650px;
+            margin: 0 auto 70px auto;
+        }
+        .section-header h2 {
+            font-size: 2.6rem;
+            margin-bottom: 15px;
+            font-weight: 700;
+            color: #1a1a19;
+        }
+        .section-header p {
+            color: #7a7772;
+            font-size: 1.05rem;
+        }
+        .services-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 20px;
+        }
+        .service-card {
+            background: #fcfbfa;
+            padding: 45px 30px;
+            border: 1px solid #edebe7;
+            transition: all 0.3s ease;
+        }
+        .service-card:hover {
+            box-shadow: 0 15px 35px rgba(43,43,42,0.06);
+            transform: translateY(-5px);
+            border-color: #1a1a19;
+        }
+        .service-icon {
+            font-size: 1.8rem;
+            color: #7a7772;
+            margin-bottom: 20px;
+            font-weight: 600;
+        }
+        .service-card h3 {
+            font-size: 1.4rem;
+            margin-bottom: 15px;
+            font-weight: 700;
+            color: #1a1a19;
+        }
+        .service-card p {
+            color: #575551;
+            font-size: 0.95rem;
+            line-height: 1.6;
+        }
+
+        /* Team People Section */
+        .team-section {
+            padding: 120px 10%;
+            background-color: #2b2b2a;
+            color: #fcfbfa;
+        }
+        .team-section .section-header h2 {
+            color: #fcfbfa;
+        }
+        .team-section .section-header p {
+            color: #bda38f;
+        }
+        .team-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 30px;
+            margin-top: 50px;
+            max-width: 1000px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        .team-card {
+            background: #1a1a19;
+            border: 1px solid #403f3c;
+            overflow: hidden;
+            transition: transform 0.3s ease, border-color 0.3s ease;
+        }
+        .team-card:hover {
+            transform: translateY(-5px);
+            border-color: #bda38f;
+        }
+        .team-image {
+            width: 100%;
+            aspect-ratio: 1 / 1; 
+            object-fit: cover;
+            display: block;
+            filter: grayscale(20%);
+            transition: filter 0.3s ease;
+        }
+        .team-card:hover .team-image {
+            filter: grayscale(0%);
+        }
+        .team-info {
+            padding: 25px 20px;
+            text-align: center;
+        }
+        .team-info h3 {
+            font-size: 1.25rem;
+            color: #fcfbfa;
+            margin-bottom: 5px;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+        }
+        .team-info p {
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: #bda38f;
+            font-weight: 500;
+        }
+
+        /* Portfolio Section */
+        .portfolio-section {
+            padding: 120px 0;
+            background-color: #fcfbfa;
+        }
+        .filter-tabs {
+            display: flex;
+            justify-content: center;
+            list-style: none;
+            gap: 30px;
+            margin-bottom: 50px;
+        }
+        .filter-btn {
+            background: none;
+            border: none;
+            font-family: 'Afacad Flux', sans-serif;
+            font-size: 0.95rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: #7a7772;
+            cursor: pointer;
+            padding: 5px 0;
+            font-weight: 600;
+            border-bottom: 2px solid transparent;
+            transition: all 0.3s ease;
+        }
+        .filter-btn.active, .filter-btn:hover {
+            color: #1a1a19;
+            border-bottom: 2px solid #1a1a19;
+        }
+        .portfolio-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 0px;
+        }
+        .portfolio-item {
+            position: relative;
+            aspect-ratio: 1 / 1;
+            overflow: hidden;
+            display: block;
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+        }
+        .portfolio-item.hidden {
+            display: none;
+        }
+        .portfolio-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(43, 43, 42, 0.9);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            transition: opacity 0.4s ease;
+            padding: 20px;
+            text-align: center;
+        }
+        .portfolio-item:hover .portfolio-overlay {
+            opacity: 1;
+        }
+        .portfolio-overlay h4 {
+            font-size: 1.5rem;
+            color: #fcfbfa;
+            margin-bottom: 8px;
+            transform: translateY(15px);
+            transition: transform 0.4s ease;
+            font-weight: 600;
+        }
+        .portfolio-overlay p {
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: #bda38f;
+            transform: translateY(15px);
+            transition: transform 0.4s ease 0.05s;
+        }
+        .portfolio-item:hover .portfolio-overlay h4,
+        .portfolio-item:hover .portfolio-overlay p {
+            transform: translateY(0);
+        }
+
+        /* Contact Section */
+        .contact-section {
+            padding: 120px 10%;
+            background-color: #f4f1eb;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 80px;
+            border-top: 1px solid #edebe7;
+        }
+        .contact-info h2 {
+            font-size: 2.6rem;
+            margin-bottom: 25px;
+            font-weight: 700;
+        }
+        .contact-info p {
+            color: #575551;
+            margin-bottom: 40px;
+            font-size: 1.05rem;
+        }
+        .info-details {
+            display: flex;
+            flex-direction: column;
+            gap: 25px;
+        }
+        .info-item h4 {
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: #7a7772;
+            margin-bottom: 5px;
+            font-weight: 600;
+        }
+        .info-item p {
+            color: #1a1a19;
+            font-size: 1.1rem;
+            margin: 0;
+        }
+        .contact-form {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+        .contact-form input, .contact-form textarea {
+            width: 100%;
+            padding: 15px;
+            border: 1px solid #dcdad4;
+            background: #fcfbfa;
+            font-family: 'Afacad Flux', sans-serif;
+            font-size: 1rem;
+            transition: border-color 0.3s;
+        }
+        .contact-form input:focus, .contact-form textarea:focus {
+            outline: none;
+            border-color: #1a1a19;
+        }
+        .btn-submit {
+            background-color: #1a1a19;
+            color: #fcfbfa;
+            border: none;
+            padding: 15px 35px;
+            text-transform: uppercase;
+            font-size: 0.9rem;
+            letter-spacing: 2px;
+            font-weight: 600;
+            cursor: pointer;
+            align-self: flex-start;
+            transition: background 0.3s;
+        }
+        .btn-submit:hover {
+            background-color: #403f3c;
+        }
+
+        /* Footer Section */
+        footer {
+            background-color: #1a1a19;
+            color: #fcfbfa;
+            padding: 80px 10% 40px 10%;
+        }
+        .footer-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr 2fr;
+            gap: 50px;
+            margin-bottom: 60px;
+        }
+        .footer-col h3 {
+            font-size: 1.3rem;
+            margin-bottom: 25px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-weight: 700;
+        }
+        .footer-col p {
+            color: #c9c6c1;
+            font-size: 0.95rem;
+            line-height: 1.8;
+        }
+        .footer-links {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        .footer-links a {
+            color: #c9c6c1;
+            text-decoration: none;
+            font-size: 0.95rem;
+            transition: color 0.3s;
+        }
+        .footer-links a:hover {
+            color: #fcfbfa;
+        }
+        .newsletter-form {
+            display: flex;
+            margin-top: 15px;
+        }
+        .newsletter-form input {
+            padding: 12px;
+            border: none;
+            background: #2b2b2a;
+            color: #fff;
+            font-family: 'Afacad Flux', sans-serif;
+            font-size: 0.95rem;
+            width: 100%;
+        }
+        .newsletter-form input:focus {
+            outline: none;
+            background: #3a3a38;
+        }
+        .btn-newsletter {
+            background: #fcfbfa;
+            color: #1a1a19;
+            border: none;
+            padding: 0 20px;
+            cursor: pointer;
+            font-weight: 700;
+        }
+        .footer-bottom {
+            border-top: 1px solid #2b2b2a;
+            padding-top: 30px;
+            text-align: center;
+        }
+        .footer-bottom p {
+            font-size: 0.85rem;
+            color: #7a7772;
+            letter-spacing: 1px;
+        }
+
+        /* Responsive Fixes */
+        @media (max-width: 1200px) {
+            .portfolio-grid { grid-template-columns: repeat(3, 1fr); }
+            .footer-grid { grid-template-columns: repeat(2, 1fr); }
+        }
+        @media (max-width: 1024px) {
+            .services-grid { grid-template-columns: repeat(2, 1fr); }
+            .team-grid { grid-template-columns: repeat(3, 1fr); gap: 20px; }
+            .contact-section { grid-template-columns: 1fr; gap: 50px; }
+        }
+        @media (max-width: 768px) {
+            .services-grid { grid-template-columns: 1fr; }
+            .team-grid { grid-template-columns: 1fr; max-width: 340px; }
+            .portfolio-grid { grid-template-columns: repeat(2, 1fr); }
+            .footer-grid { grid-template-columns: 1fr; gap: 30px; }
+            .form-row { grid-template-columns: 1fr; }
+            .hero h1 { font-size: 2.6rem; }
+            .nav-links { display: none; }
+        }
+        @media (max-width: 480px) {
+            .portfolio-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="scroll-progress" id="scrollProgress"></div>
+
+    <!-- Navigation -->
+    <nav>
+        <a href="#home" class="brand-wrapper">
+            <img src="images/logo.png" alt="Hallmark Designs Logo" class="logo-img">
+            <div class="logo-text">Hallmark Designs</div>
+        </a>
+        <ul class="nav-links">
+            <li><a href="#home">Home</a></li>
+            <li><a href="#services">Services</a></li>
+            <li><a href="#team">Our Team</a></li>
+            <li><a href="#portfolio">Portfolio</a></li>
+            <li><a href="#contact">Contact</a></li>
+        </ul>
+    </nav>
+
+    <!-- Hero Section with Synchronized Background and Integrated Identity Slideshow -->
+    <section class="hero" id="home">
+        <div class="hero-slide active" style="background-image: url('images/slide1.jpg');"></div>
+        <div class="hero-slide" style="background-image: url('images/slide2.jpg');"></div>
+        <div class="hero-slide" style="background-image: url('images/slide3.jpg');"></div>
+        <div class="hero-slide" style="background-image: url('images/slide4.jpg');"></div>
+        
+        <div class="hero-overlay"></div>
+
+        <div class="hero-content">
+            <h1 id="hero-title">We Love Modern Designs</h1>
+            <p id="hero-desc">Creating elevated structural layouts, interior environments, and high-accuracy blueprints that translate your spatial concepts into precise physical reality.</p>
+            <a href="#portfolio" class="btn-cta">View Our Works</a>
+        </div>
+    </section>
+
+    <!-- Services Section -->
+    <section class="services-section" id="services">
+        <div class="section-header reveal">
+            <h2>Our Services</h2>
+            <p>Delivering comprehensive design layouts and AutoCAD execution parameters tailored to regional requirements.</p>
+        </div>
+        <div class="services-grid">
+            <div class="service-card reveal reveal-1">
+                <div class="service-icon">01</div>
+                <h3>Architecture</h3>
+                <p>Comprehensive structural programming, schematic design blueprints, and site master planning with a modern touch.</p>
+            </div>
+            <div class="service-card reveal reveal-2">
+                <div class="service-icon">02</div>
+                <h3>Interior Design</h3>
+                <p>Curating precise material transitions, structural custom millwork, ambient lighting configurations, and spatial ergonomics.</p>
+            </div>
+            <div class="service-card reveal reveal-3">
+                <div class="service-icon">03</div>
+                <h3>3D Renderings</h3>
+                <p>Photorealistic 3D environment construction and panoramic walk-through configurations to preview your build seamlessly.</p>
+            </div>
+            <div class="service-card reveal reveal-4">
+                <div class="service-icon">04</div>
+                <h3>Floor Plans</h3>
+                <p>Adaptive space partitioning, precision scaling, and high-accuracy CAD layout specifications for residential frameworks.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Our Team Section -->
+    <section class="team-section" id="team">
+        <div class="section-header reveal">
+            <h2>Our Hardworking Team</h2>
+            <p>Meet the dedicated professionals translating creative design ideas into highly precise realities.</p>
+        </div>
+        <div class="team-grid">
+            <!-- Team Member 1 -->
+            <div class="team-card reveal reveal-1">
+                <img src="images/team1.jpg" alt="Team Member 1" class="team-image">
+                <div class="team-info">
+                    <h3>Ankit Sharma</h3>
+                    <p>Principal Architect</p>
+                </div>
+            </div>
+            <!-- Team Member 2 -->
+            <div class="team-card reveal reveal-2">
+                <img src="images/team2.jpg" alt="Team Member 2" class="team-image">
+                <div class="team-info">
+                    <h3>Pooja Shrestha</h3>
+                    <p>Lead Interior Designer</p>
+                </div>
+            </div>
+            <!-- Team Member 3 -->
+            <div class="team-card reveal reveal-3">
+                <img src="images/team3.jpg" alt="Team Member 3" class="team-image">
+                <div class="team-info">
+                    <h3>Rohan Thapa</h3>
+                    <p>Senior CAD Specialist</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Portfolio Section -->
+    <section class="portfolio-section" id="portfolio">
+        <div class="section-header reveal">
+            <h2>Featured Projects</h2>
+            <p>Explore a selection of our structural footprints, interior renders, and high-contrast spatial blueprints.</p>
+        </div>
+        
+        <!-- Filter Tabs -->
+        <div class="filter-tabs">
+            <button class="filter-btn active" onclick="filterPortfolio('all')">All Work</button>
+            <button class="filter-btn" onclick="filterPortfolio('architecture')">Architecture</button>
+            <button class="filter-btn" onclick="filterPortfolio('interior')">Interior &amp; Renders</button>
+            <button class="filter-btn" onclick="filterPortfolio('plans')">Floor Plans Design</button>
+        </div>
+
+        <!-- Portfolio Grid pointing to local images folder -->
+        <div class="portfolio-grid">
+            <div class="portfolio-item reveal" data-category="architecture" style="background-image: url('images/project1.jpg');">
+                <div class="portfolio-overlay">
+                    <h4>Minimalist Pavilion</h4>
+                    <p>Architecture</p>
+                </div>
+            </div>
+            <div class="portfolio-item reveal" data-category="interior" style="background-image: url('images/project2.jpg');">
+                <div class="portfolio-overlay">
+                    <h4>Monochrome Workspace</h4>
+                    <p>Interior Design</p>
+                </div>
+            </div>
+            <div class="portfolio-item reveal" data-category="plans" style="background-image: url('images/project3.jpg');">
+                <div class="portfolio-overlay">
+                    <h4>Three-Level Residential Layout</h4>
+                    <p>Floor Plans Design</p>
+                </div>
+            </div>
+            <div class="portfolio-item reveal" data-category="interior" style="background-image: url('images/project4.jpg');">
+                <div class="portfolio-overlay">
+                    <h4>Cinematic Living Lounge</h4>
+                    <p>3D Rendering Focus</p>
+                </div>
+            </div>
+            <div class="portfolio-item reveal" data-category="plans" style="background-image: url('images/project5.jpg');">
+                <div class="portfolio-overlay">
+                    <h4>Compact Plot CAD Vector</h4>
+                    <p>Floor Plans Design</p>
+                </div>
+            </div>
+            <div class="portfolio-item reveal" data-category="interior" style="background-image: url('images/project6.jpg');">
+                <div class="portfolio-overlay">
+                    <h4>Geometric Studio Suite</h4>
+                    <p>Interior Design</p>
+                </div>
+            </div>
+            <div class="portfolio-item reveal" data-category="architecture" style="background-image: url('images/project7.jpg');">
+                <div class="portfolio-overlay">
+                    <h4>Hillside Structural Frame</h4>
+                    <p>Architecture</p>
+                </div>
+            </div>
+            <div class="portfolio-item reveal" data-category="plans" style="background-image: url('images/project8.jpg');">
+                <div class="portfolio-overlay">
+                    <h4>Residential Scale Blueprint</h4>
+                    <p>Floor Plans Design</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Contact Section -->
+    <section class="contact-section" id="contact">
+        <div class="contact-info reveal">
+            <h2>Contact Studio</h2>
+            <p>Ready to initialize a custom 3D rendering blueprint or configure an optimized residential plan? Contact Hallmark Designs today.</p>
+            <div class="info-details">
+                <div class="info-item">
+                    <h4>Studio Location</h4>
+                    <p>Kathmandu Valley, Bagmati Province, Nepal</p>
+                </div>
+                <div class="info-item">
+                    <h4>Direct Inquiries</h4>
+                    <p>info@hallmarkdesigns.com</p>
+                </div>
+                <div class="info-item">
+                    <h4>Office Line</h4>
+                    <p>+977 (1) 400-0000</p>
+                </div>
+            </div>
+        </div>
+        <div class="reveal reveal-2">
+            <form class="contact-form" onsubmit="event.preventDefault(); alert('Thank you for connecting with Hallmark Designs!');">
+                <div class="form-row">
+                    <input type="text" placeholder="Your Name" required>
+                    <input type="email" placeholder="Your Email" required>
+                </div>
+                <input type="text" placeholder="Design Requirement (e.g. 3D Render, Floor Plan)" required>
+                <textarea rows="6" placeholder="Describe your structural metrics, plot dimensions, or aesthetic intent..." required></textarea>
+                <button type="submit" class="btn-submit">Launch Inquiry</button>
+            </form>
+        </div>
+    </section>
+
+    <div class="back-to-top" id="backToTop" aria-label="Back to top">&#8593;</div>
+
+    <!-- Footer Section -->
+    <footer>
+        <div class="footer-grid">
+            <div class="footer-col">
+                <div class="brand-wrapper" style="margin-bottom: 20px;">
+                    <img src="images/logo.png" alt="Hallmark Designs Logo" class="logo-img">
+                    <div class="logo-text" style="color: #fcfbfa;">Hallmark Designs</div>
+                </div>
+                <p>A precision architecture layout and spatial structure studio delivering immaculate blueprints, CAD assets, and premium realistic environment renderings across Nepal.</p>
+            </div>
+            <div class="footer-col">
+                <h3>Quick Links</h3>
+                <ul class="footer-links">
+                    <li><a href="#home">Home</a></li>
+                    <li><a href="#services">Expertise Specs</a></li>
+                    <li><a href="#portfolio">Project Index</a></li>
+                </ul>
+            </div>
+            <div class="footer-col">
+                <h3>Our Core Focus</h3>
+                <ul class="footer-links">
+                    <li><a href="#services">CAD Plan Drafting</a></li>
+                    <li><a href="#services">3D Environments</a></li>
+                    <li><a href="#services">Interior Texturing</a></li>
+                    <li><a href="#services">AutoCAD Frameworks</a></li>
+                </ul>
+            </div>
+            <div class="footer-col">
+                <h3>Studio Briefs</h3>
+                <p>Receive periodic analytics regarding modern architectural blueprints and local layout case studies.</p>
+                <form class="newsletter-form" onsubmit="event.preventDefault(); alert('Subscribed to Hallmark Designs updates!');">
+                    <input type="email" placeholder="Enter email address" required>
+                    <button type="submit" class="btn-newsletter">&#10142;</button>
+                </form>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>Copyright &copy; 2026 Hallmark Designs. All rights reserved. Architectural Layout Infrastructure.</p>
+        </div>
+    </footer>
+
+    <!-- Interactive Scripts Engine -->
+    <script>
+        // 1. Dynamic Background + Copy Slideshow Array (Integrated Metrics into Slide 4)
+        const slideshowContent = [
+            {
+                title: "We Love Modern Designs",
+                desc: "Creating elevated structural layouts, interior environments, and high-accuracy blueprints that translate your spatial concepts into precise physical reality."
+            },
+            {
+                title: "Photorealistic 3D Renders",
+                desc: "Immerse yourself inside photorealistic environments and dynamic walkthrough previews engineered before construction teams break ground."
+            },
+            {
+                title: "Precision Floor Plan Drafting",
+                desc: "Optimized residential layouts and spatial engineering frameworks cleanly plotted using modern AutoCAD drafting standards."
+            },
+            {
+                title: "Integrated Architectural & Interior Studio",
+                desc: "Based in Nepal, we construct minimalist, ergonomic spaces prioritizing structural harmony and technical execution. With over 10 years of experience, 200+ finished projects, 150+ happy clients, and 25 design awards, we transform structural footprints into exceptional realities."
+            }
+        ];
+
+        let currentSlideIndex = 0;
+        const slides = document.querySelectorAll('.hero-slide');
+        const titleElement = document.getElementById('hero-title');
+        const descElement = document.getElementById('hero-desc');
+        const slideIntervalTime = 6000;
+
+        function cycleHeroSlideshow() {
+            titleElement.classList.add('text-fade-out');
+            descElement.classList.add('text-fade-out');
+
+            setTimeout(() => {
+                slides[currentSlideIndex].classList.remove('active');
+                currentSlideIndex = (currentSlideIndex + 1) % slides.length;
+                slides[currentSlideIndex].classList.add('active');
+
+                titleElement.textContent = slideshowContent[currentSlideIndex].title;
+                descElement.textContent = slideshowContent[currentSlideIndex].desc;
+
+                titleElement.classList.remove('text-fade-out');
+                descElement.classList.remove('text-fade-out');
+            }, 400); 
+        }
+        
+        setInterval(cycleHeroSlideshow, slideIntervalTime);
+
+
+        // 2. Portfolio Filtering Logic
+        function filterPortfolio(category) {
+            const buttons = document.querySelectorAll('.filter-btn');
+            buttons.forEach(btn => btn.classList.remove('active'));
+            if(window.event && window.event.target) {
+                window.event.target.classList.add('active');
+            }
+
+            const items = document.querySelectorAll('.portfolio-item');
+            items.forEach(item => {
+                if (category === 'all' || item.getAttribute('data-category') === category) {
+                    item.classList.remove('hidden');
+                    // re-play the reveal animation for items coming back into view
+                    item.classList.remove('in-view');
+                    requestAnimationFrame(() => requestAnimationFrame(() => item.classList.add('in-view')));
+                } else {
+                    item.classList.add('hidden');
+                }
+            });
+        }
+
+        // 3. Scroll-driven effects: progress bar, nav shadow, back-to-top, parallax
+        const navEl = document.querySelector('nav');
+        const scrollProgress = document.getElementById('scrollProgress');
+        const backToTop = document.getElementById('backToTop');
+        const heroSlideEls = document.querySelectorAll('.hero-slide');
+
+        function handleScrollEffects() {
+            const scrollTop = window.scrollY;
+            const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+            const pct = docHeight > 0 ? (scrollTop / docHeight) * 100 : 0;
+            scrollProgress.style.width = pct + '%';
+
+            navEl.classList.toggle('scrolled', scrollTop > 30);
+            backToTop.classList.toggle('show', scrollTop > 600);
+
+            // gentle parallax drift on the hero background slides
+            heroSlideEls.forEach(slide => {
+                slide.style.transform = `translateY(${scrollTop * 0.15}px) scale(1.05)`;
+            });
+        }
+        window.addEventListener('scroll', handleScrollEffects, { passive: true });
+        handleScrollEffects();
+
+        backToTop.addEventListener('click', () => {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        });
+
+        // 4. Reveal-on-scroll for sections, cards, and portfolio tiles
+        const revealTargets = document.querySelectorAll('.reveal');
+        const revealObserver = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('in-view');
+                    revealObserver.unobserve(entry.target);
+                }
+            });
+        }, { threshold: 0.15 });
+        revealTargets.forEach(el => revealObserver.observe(el));
+    </script>
+
+</body>
+</html>
